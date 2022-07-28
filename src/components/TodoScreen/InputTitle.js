@@ -1,5 +1,8 @@
 import React, {PureComponent} from 'react';
-import {Box, Heading, Input, Icon, Button} from 'native-base';
+import {Box, Heading, Input, Icon, Button, Toast} from 'native-base';
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
+import * as todoAction from '../../redux/actions';
 import {Entypo} from '@native-base/icons';
 
 export class InputTitle extends PureComponent {
@@ -21,6 +24,34 @@ export class InputTitle extends PureComponent {
 
   clearText = () => {
     this.setState({title: ''});
+  };
+
+  onSubmit = () => {
+    const {addTodo} = this.props;
+    if (this.state.title.length > 0) {
+      this.clearText();
+      addTodo(this.state.title);
+    } else {
+      Toast.show({
+        render: () => {
+          return (
+            <Box
+              bg="danger.600"
+              px="2"
+              py="1"
+              rounded="sm"
+              mt={5}
+              _text={{
+                color: 'warmGray.50',
+              }}>
+              กรุณากรอกข้อมูล
+            </Box>
+          );
+        },
+        placement: 'top',
+        status: 'warning',
+      });
+    }
   };
 
   render() {
@@ -50,14 +81,12 @@ export class InputTitle extends PureComponent {
             />
           }
           onChangeText={text => this.handleTextChange(text)}
+          onSubmitEditing={this.onSubmit}
         />
         <Button
           mt="7"
           colorScheme="indigo"
-          onPress={() => {
-            this.setTitle(this.state.title);
-            this.clearText();
-          }}>
+          onPress={this.onSubmit}>
           เพิ่ม
         </Button>
       </Box>
@@ -65,4 +94,12 @@ export class InputTitle extends PureComponent {
   }
 }
 
-export default InputTitle;
+const mapStateToProps = state => ({
+  todoReducer: state.todoReducer,
+});
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators(todoAction, dispatch);
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(InputTitle);

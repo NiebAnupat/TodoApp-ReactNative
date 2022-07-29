@@ -1,4 +1,4 @@
-import React, { PureComponent,memo  } from 'react'
+import React, { PureComponent  } from 'react'
 import {TouchableOpacity} from 'react-native';
 import { Feather } from '@native-base/icons';
 import {Box,Text,Icon,Checkbox} from 'native-base'

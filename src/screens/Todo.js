@@ -2,66 +2,14 @@ import React, {Component} from 'react';
 import {View, VStack, Box, Heading, Toast} from 'native-base';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import * as todoAction from '../redux/actions';
+import * as todoAction from '../redux/todo/actions';
 import InputTitle from '../components/TodoScreen/InputTitle';
-import todoItem from '../models/todoItem';
 import {ViewTodo} from './../components/TodoScreen/ViewTodo';
 
 export class Todo extends Component {
   constructor(props) {
     super(props);
   }
-
-  // addTodo = title => {
-  //   const todo = new todoItem(title);
-  //   this.setState({
-  //     todos: [...this.state.todos, todo],
-  //   });
-  // };
-
-  // removeTodo = id => {
-  //   this.setState({
-  //     todos: this.state.todos.filter(todo => todo.getId() !== id),
-  //   });
-  // };
-
-  // toggleTodo = id => {
-  //   const todos = this.state.todos.map(todo => {
-  //     if (todo.getId() === id) {
-  //       todo.setCompleted(!todo.isCompleted());
-  //     }
-  //     return todo;
-  //   });
-  //   this.setState({todos}, () => {});
-  // };
-
-  // setTitle = async text => {
-  //   // await this.setState({title: text});
-  //   if (text.length > 0) {
-  //     await this.setState({title: text});
-  //     this.addTodo(this.state.title);
-  //   } else {
-  //     Toast.show({
-  //       render: () => {
-  //         return (
-  //           <Box
-  //             bg="danger.600"
-  //             px="2"
-  //             py="1"
-  //             rounded="sm"
-  //             mt={5}
-  //             _text={{
-  //               color: 'warmGray.50',
-  //             }}>
-  //             กรุณากรอกข้อมูล
-  //           </Box>
-  //         );
-  //       },
-  //       placement: 'top',
-  //       status: 'warning',
-  //     });
-  //   }
-  // };
 
   render() {
     const {todoReducer} = this.props;

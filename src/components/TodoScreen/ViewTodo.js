@@ -1,10 +1,8 @@
 import React, {Component, memo} from 'react';
-import {ScrollView, FlatList} from 'react-native';
+import { FlatList} from 'react-native';
 import {Text, View} from 'native-base';
 import {Todo} from './Todo';
 
-import key from 'weak-key';
-import uuid from 'uuid-random';
 
 export class ViewTodo extends Component {
   constructor(props) {

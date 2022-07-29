@@ -11,33 +11,58 @@ import {
   HStack,
   Button,
   Icon,
+  Toast
 } from 'native-base';
-
 import {FontAwesome} from '@native-base/icons';
+
+import * as userAction from '../redux/user/actions';
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
 
 export class Login extends Component {
   constructor({navigation}) {
     super();
     this.navigation = navigation;
     this.state = {
-      email: '',
-      password: '',
+      email: null,
+      password: null,
     };
   }
 
-  componentDidMount() {
-    login = () => {
-      console.log('login....');
-      this.navigation.navigate('Todo');
-    };
+  handleEmailChange = text => {
+    this.setState({email: text});
+  };
+
+  handlePasswordChange = text => {
+    this.setState({password: text});
+  };
+
+  login = async () => {
+    const {email, password} = this.state;
+
+    if (email && password) {
+      await this.props.userLogin(email, password);
+      if (this.props.userReducer.isLoggedIn) {
+        console.log('login success....');
+        this.navigation.navigate('Todo');
+      } else {
+        console.log('login fail....');
+      }
+    }
+  };
+
+  componentDidUpdate(){
+    console.log(this.state);
+    
   }
 
   render() {
     const react_logo = require('../assets/img/react-logo.png');
+    // const {userLogin,userLogout,userRegister} = this.props;
 
     return (
       <View pt="10" h="100%" bg="#151E31">
-        <VStack space="6" >
+        <VStack space="6">
           <Image
             source={react_logo}
             style={{width: 150, height: 150}}
@@ -74,6 +99,7 @@ export class Login extends Component {
                       color="white"
                     />
                   }
+                  onChangeText={this.handleEmailChange}
                 />
               </FormControl>
               <FormControl>
@@ -93,6 +119,7 @@ export class Login extends Component {
                       color="white"
                     />
                   }
+                  onChangeText={this.handlePasswordChange}
                 />
                 <Link
                   _text={{
@@ -109,7 +136,7 @@ export class Login extends Component {
                 mt="2"
                 colorScheme="indigo"
                 onPress={() => {
-                  login();
+                  this.login();
                 }}>
                 เข้าสู่ระบบ
               </Button>
@@ -140,4 +167,12 @@ export class Login extends Component {
   }
 }
 
-export default Login;
+const mapStateToProps = state => ({
+  userReducer: state.userReducer,
+});
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators(userAction, dispatch);
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

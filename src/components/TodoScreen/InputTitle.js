@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import {Box, Heading, Input, Icon, Button, Toast} from 'native-base';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import * as todoAction from '../../redux/actions';
+import * as todoAction from '../../redux/todo/actions';
 import {Entypo} from '@native-base/icons';
 
 export class InputTitle extends PureComponent {

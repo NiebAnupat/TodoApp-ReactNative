@@ -1,42 +1,118 @@
 import todoItem from '../../models/todoItem';
-
-export const SET_TITLE = 'SET_TITLE';
-export const CLEAR_TITLE = 'CLEAR_TITLE';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import uuid from 'uuid-random';
 export const ADD_TODO = 'ADD_TODO';
 export const REMOVE_TODO = 'REMOVE_TODO';
+export const CLEAR_TODO = 'CLEAR_TODO';
 export const TOGGLE_TODO = 'TOGGLE_TODO';
+export const TOGGLE_LOADING = 'TOGGLE_LOADING';
 
-export const setTitle = title => dispatch => {
-  dispatch({
-    type: SET_TITLE,
-    payload: title,
-  });
-};
-
-export const claerTitle = () => dispatch => {
-  dispatch({
-    type: CLEAR_TITLE,
-    payload: '',
-  });
-};
+const userUid = !!auth().currentUser ? auth().currentUser.uid : '';
+const todoCollection = firestore()
+  .collection('users')
+  .doc(userUid)
+  .collection('todos');
 
 export const addTodo = title => dispatch => {
-  dispatch({
-    type: ADD_TODO,
-    payload: new todoItem(title),
-  });
+  console.log('Add Todo To User : ', userUid);
+  const uid = uuid();
+  todoCollection
+    .doc(uid)
+    .set({
+      id: uid,
+      title: title,
+      completed: false,
+      timeStame: firestore.Timestamp.now(),
+    })
+    .then(() => {
+      dispatch({
+        type: ADD_TODO,
+        payload: new todoItem(uid, title, false),
+      });
+      console.log('Todo added');
+    })
+    .catch(error => {
+      console.log(error);
+    });
 };
 
-export const removeTodo = TodoID => dispatch => {
+export const clearTodo = () => dispatch => {
   dispatch({
-    type: REMOVE_TODO,
-    payload: TodoID,
+    type: CLEAR_TODO,
   });
+}
+
+export const removeTodo = TodoID => dispatch => {
+  todoCollection
+    .doc(TodoID)
+    .delete()
+    .then(() => {
+      dispatch({
+        type: REMOVE_TODO,
+        payload: TodoID,
+      });
+    })
+    .catch(error => {
+      console.log(error.code);
+    });
 };
 
 export const toggleTodo = TodoID => dispatch => {
+  console.log('Toggle ID : ', TodoID);
+  todoCollection
+    .doc(TodoID)
+    .get()
+    .then(querySnapshot => {
+      const todo = querySnapshot.data();
+      console.log('Toggle Todo : ', todo);
+      todoCollection
+        .doc(TodoID)
+        .update({
+          completed: !todo.completed,
+        })
+        .then(() => {
+          dispatch({
+            type: TOGGLE_TODO,
+            payload: TodoID,
+          });
+          console.log('Toggle Completed');
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    })
+    .catch(error => {
+      console.log(error.code);
+    });
+};
+
+export const fetchTodos = () => dispatch => {
   dispatch({
-    type: TOGGLE_TODO,
-    payload: TodoID,
+    type: TOGGLE_LOADING,
+    payload: true,
   });
+  todoCollection
+    .orderBy('timeStame', 'asc')
+    .get()
+    .then(async snapshot => {
+      await snapshot.docs.forEach(doc => {
+        dispatch({
+          type: ADD_TODO,
+          payload: new todoItem(
+            doc.data().id,
+            doc.data().title,
+            doc.data().completed,
+          ),
+        });
+      });
+      dispatch({
+        type: TOGGLE_LOADING,
+        payload: false,
+      });
+      console.log('fetchTodos success');
+    })
+    .catch(error => {
+      console.log(error);
+    });
 };

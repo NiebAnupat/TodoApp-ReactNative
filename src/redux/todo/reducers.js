@@ -1,30 +1,19 @@
 import {
-  SET_TITLE,
-  CLEAR_TITLE,
   ADD_TODO,
   REMOVE_TODO,
+  CLEAR_TODO,
   TOGGLE_TODO,
+  TOGGLE_LOADING,
 } from './actions';
 import todoItem from '../../models/todoItem';
 
 const initialState = {
-  title: '',
-  todos: [
-    new todoItem('Todo 1'),
-    new todoItem('Todo 2'),
-    new todoItem('Todo 3'),
-    new todoItem('Todo 4'),
-  ],
+  todos: [],
+  isLoading: false,
 };
 
 function todoReducer(state = initialState, action) {
   switch (action.type) {
-    case SET_TITLE: {
-      if (action.payload > 0) return {...state, title: action.payload};
-      else return {...state, title: ''};
-    }
-    case CLEAR_TITLE:
-      return {...state, title: ''};
     case ADD_TODO:
       return {...state, todos: [...state.todos, action.payload]};
 
@@ -33,6 +22,9 @@ function todoReducer(state = initialState, action) {
         ...state,
         todos: state.todos.filter(todo => todo.getId() !== action.payload),
       };
+    case CLEAR_TODO: {
+      return {...state, todos: []};
+    }
     case TOGGLE_TODO:
       return {
         ...state,
@@ -43,6 +35,10 @@ function todoReducer(state = initialState, action) {
           return todo;
         }),
       };
+    case TOGGLE_LOADING: {
+      return {...state, isLoading: action.payload};
+    }
+
     default:
       return state;
   }

@@ -11,10 +11,10 @@ import {
   HStack,
   Button,
   Icon,
-  Toast
+  Toast,
 } from 'native-base';
 import {FontAwesome} from '@native-base/icons';
-
+import auth from '@react-native-firebase/auth';
 import * as userAction from '../redux/user/actions';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
@@ -27,6 +27,15 @@ export class Login extends Component {
       email: null,
       password: null,
     };
+
+    auth().onAuthStateChanged(user => {
+      if (user) {
+        console.log('User email: ', user.email);
+        this.navigation.navigate('Todo');
+      } else {
+        console.log('User is not logged in');
+      }
+    });
   }
 
   handleEmailChange = text => {
@@ -39,21 +48,97 @@ export class Login extends Component {
 
   login = async () => {
     const {email, password} = this.state;
-
     if (email && password) {
       await this.props.userLogin(email, password);
-      if (this.props.userReducer.isLoggedIn) {
+      console.log(auth().currentUser);
+      if (auth().currentUser) {
         console.log('login success....');
+        this.setState({
+          email: null,
+          password: null,
+        });
         this.navigation.navigate('Todo');
       } else {
         console.log('login fail....');
       }
+    } else {
+      await this.props.userErrorCode(null);
+      Toast.show({
+        render: () => {
+          return (
+            <Box
+              bg="yellow.600"
+              px="2"
+              py="1"
+              rounded="sm"
+              mt={5}
+              _text={{
+                color: 'warmGray.50',
+              }}>
+              กรุณากรอกข้อมูล
+            </Box>
+          );
+        },
+      });
+    }
+
+    const errorCode = await this.props.userReducer.errorCode;
+    if (errorCode) {
+      console.log('Error Code : ', errorCode);
+      let errorMsg = '';
+      switch (errorCode) {
+        case 'auth/user-not-found':
+          errorMsg = 'ไม่พบผู้ใช้งาน';
+          break;
+        case 'auth/wrong-password':
+          errorMsg = 'รหัสผ่านไม่ถูกต้อง';
+          break;
+        case 'auth/invalid-email':
+          errorMsg = 'อีเมลล์ไม่ถูกต้อง';
+          break;
+        case 'auth/user-disabled':
+          errorMsg = 'ผู้ใช้งานถูกระงับ';
+          break;
+        case 'auth/user-token-expired':
+          errorMsg = 'หมดเวลาใช้งาน';
+          break;
+        case 'auth/user-token-invalid':
+          errorMsg = 'หมดเวลาใช้งาน';
+          break;
+        case 'auth/user-token-not-initialized':
+          errorMsg = 'หมดเวลาใช้งาน';
+          break;
+        case 'auth/user-token-revoked':
+          errorMsg = 'หมดเวลาใช้งาน';
+          break;
+
+        default:
+          errorMsg = 'ไม่สามารถเข้าสู่ระบบได้';
+          break;
+      }
+
+      Toast.show({
+        render: () => {
+          return (
+            <Box
+              bg="yellow.600"
+              px="2"
+              py="1"
+              rounded="sm"
+              mt={5}
+              _text={{
+                color: 'warmGray.50',
+              }}>
+              {errorMsg}
+            </Box>
+          );
+        },
+      });
     }
   };
 
-  componentDidUpdate(){
+  componentDidUpdate() {
     console.log(this.state);
-    
   }
 
   render() {
@@ -85,6 +170,7 @@ export class Login extends Component {
               <FormControl>
                 <FormControl.Label>อีเมลล์</FormControl.Label>
                 <Input
+                  value={this.state.email}
                   type="String"
                   fontFamily="body"
                   fontSize="md"
@@ -105,6 +191,7 @@ export class Login extends Component {
               <FormControl>
                 <FormControl.Label>รหัสผ่าน</FormControl.Label>
                 <Input
+                  value={this.state.password}
                   type="password"
                   fontFamily="body"
                   fontSize="md"
@@ -120,6 +207,7 @@ export class Login extends Component {
                     />
                   }
                   onChangeText={this.handlePasswordChange}
+                  onSubmitEditing={this.login}
                 />
                 <Link
                   _text={{

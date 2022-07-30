@@ -1,8 +1,10 @@
-import React, {Component, memo} from 'react';
-import { FlatList} from 'react-native';
-import {Text, View} from 'native-base';
+import React, {Component} from 'react';
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
+import * as todoAction from '../../redux/todo/actions';
+import {FlatList} from 'react-native';
+import {Text, View, Center, Spinner} from 'native-base';
 import {Todo} from './Todo';
-
 
 export class ViewTodo extends Component {
   constructor(props) {
@@ -21,17 +23,29 @@ export class ViewTodo extends Component {
     const {todos} = this.props;
     return (
       <View h="78%">
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={todos}
-          renderItem={this.renderItem}
-          //     keyExtractor={()=>uuid()}
-          //     keyExtractor={item => key(item)}
-          keyExtractor={item => JSON.stringify(item)}
-        />
+        {this.props.isLoading ? (
+          <Center h='100%'>
+            <Spinner size="lg" />
+          </Center>
+        ) : (
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={todos}
+            renderItem={this.renderItem}
+            keyExtractor={item => JSON.stringify(item)}
+          />
+        )}
       </View>
     );
   }
 }
 
-export default memo(ViewTodo);
+const mapStateToProps = state => ({
+  todoReducer: state.todoReducer,
+});
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators(todoAction, dispatch);
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ViewTodo);

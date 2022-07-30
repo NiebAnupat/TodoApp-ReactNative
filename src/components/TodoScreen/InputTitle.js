@@ -1,14 +1,15 @@
 import React, {PureComponent} from 'react';
-import {Box, Heading, Input, Icon, Button, Toast} from 'native-base';
+import {Box, Heading, Input, Icon, Button, Toast, HStack} from 'native-base';
+
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import * as todoAction from '../../redux/todo/actions';
+import * as userAction from '../../redux/user/actions';
 import {Entypo} from '@native-base/icons';
 
 export class InputTitle extends PureComponent {
   constructor(props) {
     super(props);
-    this.setTitle = props.setTitle;
     this.state = {
       title: '',
     };
@@ -27,10 +28,9 @@ export class InputTitle extends PureComponent {
   };
 
   onSubmit = () => {
-    const {addTodo} = this.props;
     if (this.state.title.length > 0) {
       this.clearText();
-      addTodo(this.state.title);
+      this.props.addTodo(this.state.title);
     } else {
       Toast.show({
         render: () => {
@@ -54,16 +54,31 @@ export class InputTitle extends PureComponent {
     }
   };
 
+  onLogout = () => {
+    const {navigation} = this.props;
+    this.props.userLogout();
+    navigation.navigate('Login');
+  };
+
   render() {
     return (
       <Box mt="5%">
-        <Heading
-          fontFamily="body"
-          color="white"
-          fontSize="3xl"
-          fontWeight="600">
-          เพิ่มรายการ
-        </Heading>
+        <HStack>
+          <Heading
+            fontFamily="body"
+            color="white"
+            fontSize="3xl"
+            fontWeight="600">
+            เพิ่มรายการ
+          </Heading>
+          <Button
+            bg="danger.700"
+            ml="auto"
+            rounded="md"
+            onPress={this.onLogout}>
+            ออกจากระบบ
+          </Button>
+        </HStack>
         <Input
           value={this.state.title}
           placeholder="ชื่อรายการ"
@@ -83,10 +98,7 @@ export class InputTitle extends PureComponent {
           onChangeText={text => this.handleTextChange(text)}
           onSubmitEditing={this.onSubmit}
         />
-        <Button
-          mt="7"
-          colorScheme="indigo"
-          onPress={this.onSubmit}>
+        <Button mt="7" colorScheme="indigo" onPress={this.onSubmit}>
           เพิ่ม
         </Button>
       </Box>
@@ -99,7 +111,10 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => {
-  return bindActionCreators(todoAction, dispatch);
+  return bindActionCreators(
+    Object.assign({}, todoAction, userAction),
+    dispatch,
+  );
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(InputTitle);

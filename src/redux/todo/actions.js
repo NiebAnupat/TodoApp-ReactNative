@@ -8,7 +8,7 @@ export const CLEAR_TODO = 'CLEAR_TODO';
 export const TOGGLE_TODO = 'TOGGLE_TODO';
 export const TOGGLE_LOADING = 'TOGGLE_LOADING';
 
-const userUid = !!auth().currentUser ? auth().currentUser.uid : '';
+const userUid = auth().currentUser.uid;
 const todoCollection = firestore()
   .collection('users')
   .doc(userUid)
@@ -41,7 +41,7 @@ export const clearTodo = () => dispatch => {
   dispatch({
     type: CLEAR_TODO,
   });
-}
+};
 
 export const removeTodo = TodoID => dispatch => {
   todoCollection
@@ -60,22 +60,21 @@ export const removeTodo = TodoID => dispatch => {
 
 export const toggleTodo = TodoID => dispatch => {
   console.log('Toggle ID : ', TodoID);
+  dispatch({
+    type: TOGGLE_TODO,
+    payload: TodoID,
+  });
   todoCollection
     .doc(TodoID)
     .get()
     .then(querySnapshot => {
       const todo = querySnapshot.data();
-      console.log('Toggle Todo : ', todo);
       todoCollection
         .doc(TodoID)
         .update({
           completed: !todo.completed,
         })
         .then(() => {
-          dispatch({
-            type: TOGGLE_TODO,
-            payload: TodoID,
-          });
           console.log('Toggle Completed');
         })
         .catch(error => {

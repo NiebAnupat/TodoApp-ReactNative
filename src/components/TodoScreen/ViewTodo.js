@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import * as todoAction from '../../redux/todo/actions';
 import {FlatList} from 'react-native';
-import {Text, View, Center, Spinner} from 'native-base';
+import {View, Center, Spinner} from 'native-base';
 import {Todo} from './Todo';
 
 export class ViewTodo extends Component {
@@ -22,9 +22,9 @@ export class ViewTodo extends Component {
   render() {
     const {todos} = this.props;
     return (
-      <View h="78%">
+      <View h="79%">
         {this.props.isLoading ? (
-          <Center h='100%'>
+          <Center h="100%">
             <Spinner size="lg" />
           </Center>
         ) : (

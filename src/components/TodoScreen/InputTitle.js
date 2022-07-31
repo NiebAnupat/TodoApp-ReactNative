@@ -4,7 +4,6 @@ import {Box, Heading, Input, Icon, Button, Toast, HStack} from 'native-base';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import * as todoAction from '../../redux/todo/actions';
-import * as userAction from '../../redux/user/actions';
 import {Entypo} from '@native-base/icons';
 
 export class InputTitle extends PureComponent {
@@ -54,12 +53,6 @@ export class InputTitle extends PureComponent {
     }
   };
 
-  onLogout = () => {
-    const {navigation} = this.props;
-    this.props.userLogout();
-    navigation.navigate('Login');
-  };
-
   render() {
     return (
       <Box mt="5%">
@@ -75,7 +68,7 @@ export class InputTitle extends PureComponent {
             bg="danger.700"
             ml="auto"
             rounded="md"
-            onPress={this.onLogout}>
+            onPress={this.props.confirmLogout}>
             ออกจากระบบ
           </Button>
         </HStack>
@@ -111,10 +104,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => {
-  return bindActionCreators(
-    Object.assign({}, todoAction, userAction),
-    dispatch,
-  );
+  return bindActionCreators(todoAction, dispatch);
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(InputTitle);

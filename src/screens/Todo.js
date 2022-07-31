@@ -1,29 +1,67 @@
 import React, {Component} from 'react';
-import {View, VStack, Box, Heading, Toast, Spinner} from 'native-base';
+import {
+  View,
+  VStack,
+  Box,
+  Heading,
+  Center,
+  Button,
+  AlertDialog,
+  Text,
+} from 'native-base';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import * as todoAction from '../redux/todo/actions';
+import * as userAction from '../redux/user/actions';
 import InputTitle from '../components/TodoScreen/InputTitle';
 import {ViewTodo} from './../components/TodoScreen/ViewTodo';
 
 export class Todo extends Component {
   constructor(props) {
     super(props);
-  }
-
-  componentDidMount() {
+    this.state = {
+      isConfirmOpen: false,
+    };
     this.props.clearTodo();
     this.props.fetchTodos();
   }
 
+  onClose = () => this.setState({isConfirmOpen: false});
+  onOpen = () => this.setState({isConfirmOpen: true});
+  onLogout = () => {
+    this.props.userLogout();
+    this.props.navigation.navigate('Login');
+  };
+
+  confirmLogout = () => {
+    return (
+      <Center>
+        <AlertDialog isOpen={this.state.isConfirmOpen} onClose={this.onClose}>
+          <Box bg="warmGray.100" rounded="md" px="6" py="5" w="5/6">
+            <Heading>ออกจากระบบ</Heading>
+            <Text mt="2">คุณต้องการออกจากระบบหรือไม่ ?</Text>
+            <Button.Group space={2} ml="auto" mt="5">
+              <Button colorScheme="indigo" onPress={this.onClose}>
+                ยกเลิก
+              </Button>
+              <Button colorScheme="danger" onPress={this.onLogout}>
+                ยืนยัน
+              </Button>
+            </Button.Group>
+          </Box>
+        </AlertDialog>
+      </Center>
+    );
+  };
+
   render() {
-    const {todoReducer} = this.props;
-    const {todos} = todoReducer;
+    const {todos} = this.props.todoReducer;
     const {removeTodo, toggleTodo} = this.props;
     return (
       <View h="100%" bg="coolGray.800">
+        {this.confirmLogout()}
         <VStack mx="5%" my="5">
-          <InputTitle navigation={this.props.navigation}/>
+          <InputTitle confirmLogout={this.onOpen} />
           <Box mt="10%">
             <Heading
               mb="3"
@@ -50,7 +88,10 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => {
-  return bindActionCreators(todoAction, dispatch);
+  return bindActionCreators(
+    Object.assign({}, todoAction, userAction),
+    dispatch,
+  );
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Todo);

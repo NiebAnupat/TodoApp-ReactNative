@@ -8,7 +8,9 @@ export const CLEAR_TODO = 'CLEAR_TODO';
 export const TOGGLE_TODO = 'TOGGLE_TODO';
 export const TOGGLE_LOADING = 'TOGGLE_LOADING';
 
-const userUid = auth().currentUser.uid;
+const userUid = !!auth().currentUser ? auth().currentUser.uid : '';
+// const userUid = auth().currentUser.uid;
+
 const todoCollection = firestore()
   .collection('users')
   .doc(userUid)

@@ -15,6 +15,8 @@ import * as todoAction from '../redux/todo/actions';
 import * as userAction from '../redux/user/actions';
 import InputTitle from '../components/TodoScreen/InputTitle';
 import {ViewTodo} from './../components/TodoScreen/ViewTodo';
+import todoReducer from './../redux/todo/reducers';
+import auth from '@react-native-firebase/auth';
 
 export class Todo extends Component {
   constructor(props) {
@@ -22,8 +24,12 @@ export class Todo extends Component {
     this.state = {
       isConfirmOpen: false,
     };
-    this.props.clearTodo();
+    if (!!auth().currentUser) this.props.clearTodo();
     this.props.fetchTodos();
+  }
+
+  componentDidMount() {
+  
   }
 
   onClose = () => this.setState({isConfirmOpen: false});

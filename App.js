@@ -6,59 +6,49 @@
  * @flow strict-local
  */
 
+import 'react-native-gesture-handler';
 import React from 'react';
 import {NativeBaseProvider, Text, HStack, Icon} from 'native-base';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createDrawerNavigator} from '@react-navigation/drawer';
 import {Provider} from 'react-redux';
 import {Store} from './src/redux/store';
-import {FontAwesome} from '@native-base/icons';
 import theme from './src/assets/useTheme';
-import Login from './src/screens/Login';
+import auth from '@react-native-firebase/auth';
+import {AuthStack} from './src/navigation/AuthStack';
+import {DrawerStack} from './src/navigation/DrawerStack';
 import Todo from './src/screens/Todo';
+import Login from './src/screens/Login';
 
 const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
+
+const useNavigation = () => (
+  <Drawer.Navigator
+    initialRouteName="Login"
+    screenOptions={{
+      headerShown: false,
+    }}>
+    <Drawer.Screen
+      name="Login"
+      component={Login}
+      options={{
+        swipeEnabled: false,
+        title: null,
+        drawerLabel: () => null,
+        
+      }}
+    />
+    <Drawer.Screen name="Todo" component={Todo} />
+  </Drawer.Navigator>
+);
 
 const App = () => {
   return (
     <Provider store={Store}>
       <NativeBaseProvider theme={theme}>
-        <NavigationContainer>
-          <Stack.Navigator
-            screenOptions={{
-              headerStyle: {
-                backgroundColor: 'warmGray.900',
-              },
-            }}>
-            <Stack.Screen
-              name="Login"
-              component={Login}
-              options={{title: 'Login Screen', headerShown: false}}
-            />
-            <Stack.Screen
-              name="Todo"
-              component={Todo}
-              options={{
-                headerShown: false,
-                headerTitle: () => (
-                  <HStack alignItems="center">
-                    <Icon
-                      as={<FontAwesome name="list-ul" />}
-                      mr="2"
-                      color="darkBlue.900"
-                      size={5}
-                    />
-                    <Text fontFamily="body" color="darkBlue.900" fontSize="md">
-                      รายการที่ต้องทำ
-                    </Text>
-                  </HStack>
-                ),
-                headerTitleAlign: 'center',
-                headerBackVisible: false,
-              }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <NavigationContainer>{useNavigation()}</NavigationContainer>
       </NativeBaseProvider>
     </Provider>
   );

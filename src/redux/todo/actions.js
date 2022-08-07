@@ -2,14 +2,17 @@ import todoItem from '../../models/todoItem';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import uuid from 'uuid-random';
+import userRuducer from '../user/reducers';
 export const ADD_TODO = 'ADD_TODO';
 export const REMOVE_TODO = 'REMOVE_TODO';
 export const CLEAR_TODO = 'CLEAR_TODO';
 export const TOGGLE_TODO = 'TOGGLE_TODO';
 export const TOGGLE_LOADING = 'TOGGLE_LOADING';
 
-const userUid = !!auth().currentUser ? auth().currentUser.uid : '';
+let userUid = !!auth().currentUser ? auth().currentUser.uid : '';
+// console.log('userUid: ', userUid);
 // const userUid = auth().currentUser.uid;
+// const userUid = () => auth().currentUser.uid;
 
 const todoCollection = firestore()
   .collection('users')
@@ -89,31 +92,37 @@ export const toggleTodo = TodoID => dispatch => {
 };
 
 export const fetchTodos = () => dispatch => {
-  dispatch({
-    type: TOGGLE_LOADING,
-    payload: true,
-  });
-  todoCollection
-    .orderBy('timeStame', 'asc')
-    .get()
-    .then(async snapshot => {
-      await snapshot.docs.forEach(doc => {
-        dispatch({
-          type: ADD_TODO,
-          payload: new todoItem(
-            doc.data().id,
-            doc.data().title,
-            doc.data().completed,
-          ),
-        });
-      });
-      dispatch({
-        type: TOGGLE_LOADING,
-        payload: false,
-      });
-      console.log('fetchTodos success');
-    })
-    .catch(error => {
-      console.log(error);
+  return new Promise((resolve, reject) => {
+    dispatch({
+      type: TOGGLE_LOADING,
+      payload: true,
     });
+    firestore()
+      .collection('users')
+      .doc(auth().currentUser.uid)
+      .collection('todos')
+      .orderBy('timeStame', 'asc')
+      .get()
+      .then(async snapshot => {
+        await snapshot.docs.forEach(doc => {
+          dispatch({
+            type: ADD_TODO,
+            payload: new todoItem(
+              doc.data().id,
+              doc.data().title,
+              doc.data().completed,
+            ),
+          });
+        });
+        dispatch({
+          type: TOGGLE_LOADING,
+          payload: false,
+        });
+        console.log('fetchTodos success');
+        resolve();
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
 };

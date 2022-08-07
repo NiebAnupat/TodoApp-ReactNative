@@ -14,9 +14,6 @@ export class InputTitle extends PureComponent {
     };
   }
 
-  componentDidUpdate() {
-    console.log('Title : ', this.state.title);
-  }
 
   handleTextChange = text => {
     this.setState({title: text});
@@ -32,6 +29,7 @@ export class InputTitle extends PureComponent {
       this.props.addTodo(this.state.title);
     } else {
       Toast.show({
+        duration: 1500,
         render: () => {
           return (
             <Box

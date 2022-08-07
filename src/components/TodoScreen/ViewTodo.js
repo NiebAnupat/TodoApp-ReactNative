@@ -22,7 +22,7 @@ export class ViewTodo extends Component {
   render() {
     const {todos} = this.props;
     return (
-      <View h="79%">
+      <View h="79%" pb='3'>
         {this.props.isLoading ? (
           <Center h="100%">
             <Spinner size="lg" />

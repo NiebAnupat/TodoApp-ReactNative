@@ -16,6 +16,7 @@ import {
 import {FontAwesome} from '@native-base/icons';
 import auth from '@react-native-firebase/auth';
 import * as userAction from '../redux/user/actions';
+import * as todoAction from '../redux/todo/actions';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
@@ -49,21 +50,74 @@ export class Login extends Component {
   login = async () => {
     const {email, password} = this.state;
     if (email && password) {
-      await this.props.userLogin(email, password);
-      console.log(auth().currentUser);
-      if (auth().currentUser) {
-        console.log('login success....');
-        this.setState({
-          email: null,
-          password: null,
+      this.props
+        .userLogin(email, password)
+        .then(() => {
+          console.log('login success....');
+          this.setState({
+            email: null,
+            password: null,
+          });
+
+          this.navigation.navigate('Todo');
+        })
+        .catch(errorCode => {
+          console.log('login fail....');
+          console.log('Error Code : ', errorCode);
+          let errorMsg = '';
+          switch (errorCode) {
+            case 'auth/user-not-found':
+              errorMsg = 'ไม่พบผู้ใช้งาน';
+              break;
+            case 'auth/wrong-password':
+              errorMsg = 'รหัสผ่านไม่ถูกต้อง';
+              break;
+            case 'auth/invalid-email':
+              errorMsg = 'อีเมลล์ไม่ถูกต้อง';
+              break;
+            case 'auth/user-disabled':
+              errorMsg = 'ผู้ใช้งานถูกระงับ';
+              break;
+            case 'auth/user-token-expired':
+              errorMsg = 'หมดเวลาใช้งาน';
+              break;
+            case 'auth/user-token-invalid':
+              errorMsg = 'หมดเวลาใช้งาน';
+              break;
+            case 'auth/user-token-not-initialized':
+              errorMsg = 'หมดเวลาใช้งาน';
+              break;
+            case 'auth/user-token-revoked':
+              errorMsg = 'หมดเวลาใช้งาน';
+              break;
+
+            default:
+              errorMsg = 'ไม่สามารถเข้าสู่ระบบได้';
+              break;
+          }
+
+          Toast.show({
+            duration: 1500,
+            render: () => {
+              return (
+                <Box
+                  bg="yellow.600"
+                  px="2"
+                  py="1"
+                  rounded="sm"
+                  mt={5}
+                  _text={{
+                    color: 'warmGray.50',
+                  }}>
+                  {errorMsg}
+                </Box>
+              );
+            },
+          });
         });
-        this.navigation.navigate('Todo');
-      } else {
-        console.log('login fail....');
-      }
     } else {
-      await this.props.userErrorCode(null);
       Toast.show({
+        duration: 1500,
         render: () => {
           return (
             <Box
@@ -81,72 +135,15 @@ export class Login extends Component {
         },
       });
     }
-
-    const errorCode = await this.props.userReducer.errorCode;
-    if (errorCode) {
-      console.log('Error Code : ', errorCode);
-      let errorMsg = '';
-      switch (errorCode) {
-        case 'auth/user-not-found':
-          errorMsg = 'ไม่พบผู้ใช้งาน';
-          break;
-        case 'auth/wrong-password':
-          errorMsg = 'รหัสผ่านไม่ถูกต้อง';
-          break;
-        case 'auth/invalid-email':
-          errorMsg = 'อีเมลล์ไม่ถูกต้อง';
-          break;
-        case 'auth/user-disabled':
-          errorMsg = 'ผู้ใช้งานถูกระงับ';
-          break;
-        case 'auth/user-token-expired':
-          errorMsg = 'หมดเวลาใช้งาน';
-          break;
-        case 'auth/user-token-invalid':
-          errorMsg = 'หมดเวลาใช้งาน';
-          break;
-        case 'auth/user-token-not-initialized':
-          errorMsg = 'หมดเวลาใช้งาน';
-          break;
-        case 'auth/user-token-revoked':
-          errorMsg = 'หมดเวลาใช้งาน';
-          break;
-
-        default:
-          errorMsg = 'ไม่สามารถเข้าสู่ระบบได้';
-          break;
-      }
-
-      Toast.show({
-        render: () => {
-          return (
-            <Box
-              bg="yellow.600"
-              px="2"
-              py="1"
-              rounded="sm"
-              mt={5}
-              _text={{
-                color: 'warmGray.50',
-              }}>
-              {errorMsg}
-            </Box>
-          );
-        },
-      });
-    }
   };
 
-  componentDidUpdate() {
-    console.log(this.state);
-  }
 
   render() {
     const react_logo = require('../assets/img/react-logo.png');
     // const {userLogin,userLogout,userRegister} = this.props;
 
     return (
-      <View pt="10" h="100%" bg="#151E31">
+      <View pt='1/6' h="100%" bg="#151E31">
         <VStack space="6">
           <Image
             source={react_logo}
@@ -220,12 +217,7 @@ export class Login extends Component {
                   ลืมรหัสผ่าน ?
                 </Link>
               </FormControl>
-              <Button
-                mt="2"
-                colorScheme="indigo"
-                onPress={() => {
-                  this.login();
-                }}>
+              <Button mt="2" colorScheme="indigo" onPress={this.login}>
                 เข้าสู่ระบบ
               </Button>
               <HStack mt="6" justifyContent="center">
@@ -257,10 +249,14 @@ export class Login extends Component {
 
 const mapStateToProps = state => ({
   userReducer: state.userReducer,
+  todoReducer: state.todoReducer,
 });
 
 const mapDispatchToProps = dispatch => {
-  return bindActionCreators(userAction, dispatch);
+  return bindActionCreators(
+    Object.assign({}, userAction, todoAction),
+    dispatch,
+  );
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

@@ -24,12 +24,13 @@ export class Todo extends Component {
     this.state = {
       isConfirmOpen: false,
     };
-    if (!!auth().currentUser) this.props.clearTodo();
-    this.props.fetchTodos();
-  }
 
-  componentDidMount() {
-  
+    if (this.props.todoReducer.todos) this.props.clearTodo();
+    this.props
+      .fetchTodos()
+      .catch(err => {
+        console.log('Todo Fetched Error : ', err);
+      });
   }
 
   onClose = () => this.setState({isConfirmOpen: false});

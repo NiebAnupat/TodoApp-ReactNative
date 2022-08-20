@@ -1,11 +1,17 @@
-import {} from './actions';
+import {TOGGLE_SIGN_OUT} from './actions';
 
-const initialState = {};
+const initialState = {
+  isSignOut: false,
+};
 
 function userRuducer(state = initialState, action) {
   switch (action.type) {
-    default:
-      return state;
+    case TOGGLE_SIGN_OUT:
+      return {
+        ...state,
+        isSignOut: state.isSignOut ? false : true,
+      };
+    default: return state;
   }
 }
 

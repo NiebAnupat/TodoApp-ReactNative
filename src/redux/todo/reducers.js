@@ -4,6 +4,7 @@ import {
   CLEAR_TODO,
   TOGGLE_TODO,
   TOGGLE_LOADING,
+  CLEAR_COMPLETED
 } from './actions';
 import todoItem from '../../models/todoItem';
 
@@ -22,6 +23,13 @@ function todoReducer(state = initialState, action) {
         ...state,
         todos: state.todos.filter(todo => todo.getId() !== action.payload),
       };
+
+    case CLEAR_COMPLETED : {
+      return {
+        ...state,
+        todos: state.todos.filter(todo => !todo.isCompleted()),
+      };
+    }
     case CLEAR_TODO: {
       return {...state, todos: []};
     }

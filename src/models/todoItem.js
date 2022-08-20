@@ -1,6 +1,3 @@
-import uuid from 'uuid-random';
-// import { nanoid } from 'nanoid';
-
 class todoItem {
   constructor(id,title,completed,timeStame) {
     this.id = id;

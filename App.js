@@ -20,6 +20,7 @@ import {AuthStack} from './src/navigation/AuthStack';
 import {DrawerStack} from './src/navigation/DrawerStack';
 import Todo from './src/screens/Todo';
 import Login from './src/screens/Login';
+import {CustomDrawer} from './src/navigation/CustomDrawer';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -29,7 +30,8 @@ const useNavigation = () => (
     initialRouteName="Login"
     screenOptions={{
       headerShown: false,
-    }}>
+    }}
+    drawerContent={props => <CustomDrawer {...props} />}>
     <Drawer.Screen
       name="Login"
       component={Login}
@@ -37,7 +39,6 @@ const useNavigation = () => (
         swipeEnabled: false,
         title: null,
         drawerLabel: () => null,
-        
       }}
     />
     <Drawer.Screen name="Todo" component={Todo} />

@@ -7,10 +7,23 @@ import {Todo} from './../screens/Todo';
 export class DrawerStack extends Component {
   render() {
     const Drawer = createDrawerNavigator();
+
     return (
-      <Drawer.Navigator initialRouteName="Todo">
+      <Drawer.Navigator
+        initialRouteName="Login"
+        screenOptions={{
+          headerShown: false,
+        }}>
+        <Drawer.Screen
+          name="Login"
+          component={Login}
+          options={{
+            swipeEnabled: false,
+            title: null,
+            drawerLabel: () => null,
+          }}
+        />
         <Drawer.Screen name="Todo" component={Todo} />
-        <Drawer.Screen name="Logout" lable="ออกจากระบบ" component={Login} />
       </Drawer.Navigator>
     );
   }

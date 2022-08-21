@@ -12,6 +12,7 @@ import {
     Button,
     Icon,
     Toast,
+    Modal
 } from 'native-base';
 import {FontAwesome} from '@native-base/icons';
 import auth from '@react-native-firebase/auth';
@@ -26,18 +27,30 @@ export class Login extends Component {
         super();
         this.navigation = navigation;
         this.state = {
+
             email: null,
             password: null,
+
+            userNotSingUp: true,
+            isSignUp: false,
+            signUpEmail: null,
+            signUpPassword: null,
+            signUpPasswordConfirm: null,
+            signUpName: null,
         };
 
         auth().onAuthStateChanged(user => {
-            if (user) {
-                console.log('User email: ', user.email);
-                this.navigation.navigate('Todo');
-            } else {
-                console.log('User is not logged in');
+                if (user) {
+                    console.log('User email: ', user.email);
+                    console.log(user)
+                    this.navigation.navigate('Todo');
+
+                } else {
+                    console.log('User is not logged in');
+                }
             }
-        });
+        )
+        ;
     }
 
     handleEmailChange = text => {
@@ -53,9 +66,9 @@ export class Login extends Component {
         if (email && password) {
             this.props
                 .userLogin(email, password)
-                .then(() => {
+                .then(async () => {
                     console.log('login success....');
-                    this.setState({
+                    await this.setState({
                         email: '',
                         password: '',
                     });
@@ -108,10 +121,204 @@ export class Login extends Component {
         }
     };
 
+    toggleSignUp = async () => {
+        console.log('toggleSignUp');
+        await this.setState({isSignUp: !this.state.isSignUp});
+        console.log('isSignUp : ', this.state.isSignUp);
+    }
+
+    handleSignUpEmailChange = text => {
+        this.setState({signUpEmail: text});
+    }
+
+    handleSignUpPasswordChange = text => {
+        this.setState({signUpPassword: text});
+    }
+
+    handleSignUpPasswordConfirmChange = text => {
+        this.setState({signUpPasswordConfirm: text});
+    }
+
+    handleSignUpNameChange = text => {
+        this.setState({signUpName: text});
+    }
+
+    signUpModal = () => {
+        return (
+            <Modal isOpen={this.state.isSignUp} onClose={this.toggleSignUp} bg="#151E31">
+                <View w={"80%"}>
+                    <VStack>
+                        <Text bold fontSize={'2xl'} color={"white"} my={3}>สมัครสมาชิก</Text>
+
+                        <FormControl>
+                            <Input
+                                my={2}
+                                color={'warmGray.50'}
+                                fontSize={'sm'}
+                                placeholder="ชื่อผู้ใช้"
+                                onChangeText={this.handleSignUpNameChange}
+                                value={this.state.signUpName}
+                            />
+                        </FormControl>
+
+                        <FormControl>
+                            <Input
+                                my={2}
+                                color={'warmGray.50'}
+                                fontSize={'sm'}
+                                placeholder="อีเมลล์"
+                                onChangeText={this.handleSignUpEmailChange}
+                                value={this.state.signUpEmail}
+                            />
+                        </FormControl>
+
+                        <FormControl>
+                            <Input
+                                my={2}
+                                color={'warmGray.50'}
+                                fontSize={'sm'}
+                                placeholder="รหัสผ่าน"
+                                type="password"
+                                onChangeText={this.handleSignUpPasswordChange}
+                                value={this.state.signUpPassword}
+                            />
+                        </FormControl>
+                        <FormControl>
+                            <Input
+                                my={2}
+                                color={'warmGray.50'}
+                                fontSize={'sm'}
+                                placeholder="ยืนยันรหัสผ่าน"
+                                type="password"
+                                onChangeText={this.handleSignUpPasswordConfirmChange}
+                                value={this.state.signUpPasswordConfirm}
+                                onSubmitEditing={this.signUp}
+                            />
+                        </FormControl>
+                        <HStack mt={5}>
+                            <Button
+                                w={'40%'}
+                                mx={'auto'}
+                                colorScheme={"indigo"}
+                                onPress={this.signUp}
+                                disabled={
+                                    !this.state.signUpEmail ||
+                                    !this.state.signUpPassword ||
+                                    !this.state.signUpPasswordConfirm ||
+                                    !this.state.signUpName
+                                }>
+                                <Text fontSize={'sm'} color={"warmGray.50"}>สมัครสมาชิก</Text>
+                            </Button>
+
+                            <Button
+                                w={'40%'}
+                                mx={'auto'}
+                                colorScheme={"red"}
+                                onPress={this.toggleSignUp}>
+                                <Text fontSize={'sm'} color={"warmGray.50"}>ยกเลิก</Text>
+                            </Button>
+                        </HStack>
+                    </VStack>
+                </View>
+            </Modal>
+        )
+    }
+
+    signUp = async () => {
+        const {signUpEmail, signUpPassword, signUpPasswordConfirm, signUpName} = this.state;
+        console.log('signUpEmail : ', signUpEmail);
+        console.log('signUpPassword : ', signUpPassword);
+        console.log('signUpPasswordConfirm : ', signUpPasswordConfirm);
+        console.log('signUpName : ', signUpName);
+        if (signUpEmail && signUpPassword && signUpPasswordConfirm && signUpName) {
+            if (signUpPassword == signUpPasswordConfirm) {
+                await this.setState({userNotSingUp: false});
+                this.props
+                    .userSignUp(signUpEmail, signUpPassword, signUpName)
+                    .then(async () => {
+                        console.log('signUp success....');
+                        await this.setState({
+                            isSignUp: false,
+                            signUpEmail: '',
+                            signUpPassword: '',
+                            signUpPasswordConfirm: '',
+                            signUpName: '',
+                        });
+
+                    }).catch(errorCode => {
+                        console.log('signUp fail....');
+                        console.log('Error Code : ', errorCode);
+                        let errorMsg = getErrAuthMsg(errorCode);
+
+                        Toast.show({
+                            duration: 1500,
+                            render: () => {
+                                return (
+                                    <Box
+                                        bg="yellow.600"
+                                        px="2"
+                                        py="1"
+                                        rounded="sm"
+                                        mt={5}
+                                        _text={{
+                                            color: 'warmGray.50',
+                                        }}>
+                                        {errorMsg}
+                                    </Box>
+                                );
+                            },
+                        });
+                    }
+                );
+            } else {
+                Toast.show({
+                    duration: 1500,
+                    render: () => {
+                        return (
+                            <Box
+                                bg="yellow.600"
+                                px="2"
+                                py="1"
+                                rounded="sm"
+                                mt={5}
+                                _text={{
+                                    color: 'warmGray.50',
+                                }}>
+                                รหัสผ่านไม่ตรงกัน
+                            </Box>
+                        );
+                    },
+                });
+            }
+        } else {
+            Toast.show({
+                duration: 1500,
+                render: () => {
+                    return (
+                        <Box
+                            bg="yellow.600"
+                            px="2"
+                            py="1"
+                            rounded="sm"
+                            mt={5}
+                            _text={{
+                                color: 'warmGray.50',
+                            }}>
+                            กรุณากรอกข้อมูลให้ครบถ้วน
+                        </Box>
+                    );
+                },
+            });
+        }
+    }
+
     render() {
         const react_logo = require('../assets/img/react-logo.png');
         return (
             <View pt="1/6" h="100%" bg="#151E31">
+
+                {this.signUpModal()}
+
                 <VStack space="6">
                     <Image
                         source={react_logo}
@@ -188,6 +395,7 @@ export class Login extends Component {
                             <Button mt="2" colorScheme="indigo" onPress={this.login}>
                                 เข้าสู่ระบบ
                             </Button>
+
                             <HStack mt="6" justifyContent="center">
                                 <Text
                                     fontSize="sm"
@@ -203,13 +411,14 @@ export class Login extends Component {
                                         fontWeight: 'medium',
                                         fontSize: 'sm',
                                     }}
-                                    href="#">
+                                    onPress={this.toggleSignUp}>
                                     สมัครสมาชิกเลย !
                                 </Link>
                             </HStack>
                         </VStack>
                     </Box>
                 </VStack>
+
             </View>
         );
     }

@@ -28,11 +28,6 @@ export class Todo extends Component {
             console.log('Todo Fetched Error : ', err);
         });
 
-        // if(this.props.navigation)
-
-        this.props.navigation.addListener( event => {r
-            console.log(event)
-        })
     }
 
 

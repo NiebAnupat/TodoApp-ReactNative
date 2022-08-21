@@ -4,7 +4,6 @@ import firestore from '@react-native-firebase/firestore';
 export const TOGGLE_SIGN_OUT = 'TOGGLE_SIGN_OUT';
 
 
-
 const checkUserInDB = async email => {
     console.log('checkUserInDB: ', email);
     const user = await firestore()
@@ -46,10 +45,10 @@ export const userLogin = (email, password) => async dispatch => {
     });
 };
 
-export const toggelSignOut = () => {
-    return {
-        type: TOGGLE_SIGN_OUT,
-    };
+export const toggelSignOut = () => dispatch => {
+    dispatch(
+        {type: TOGGLE_SIGN_OUT,}
+    );
 }
 
 export const userLogout = () => dispatch => {
@@ -63,11 +62,27 @@ export const userLogout = () => dispatch => {
         });
 };
 
-export const userRegister = (email, password, confirmPassword) => dispatch => {
-    if (password === confirmPassword) {
+export const userSignUp = (email, password, username) => dispatch => {
+    return new Promise((resolve, reject) => {
+
         auth()
             .createUserWithEmailAndPassword(email, password)
             .then(() => {
+                console.log('User created successfully');
+
+                console.log('Update user data');
+                auth()
+                    .currentUser.updateProfile({
+                    displayName: username,
+                })
+                    .then(() => {
+                        console.log('User data updated');
+                    }).catch(error => {
+                        console.log(error);
+                    }
+                );
+
+                console.log('Saving user...');
                 firestore()
                     .collection('users')
                     .add({
@@ -80,13 +95,12 @@ export const userRegister = (email, password, confirmPassword) => dispatch => {
                     .catch(error => {
                         console.log(error);
                     });
-
                 console.log('register success....');
+                resolve();
             })
             .catch(error => {
-                console.log(error);
+                reject(error.code);
             });
-    } else {
-        console.log('Password is not match');
-    }
+
+    })
 };

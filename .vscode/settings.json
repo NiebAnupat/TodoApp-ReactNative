@@ -1,0 +1,9 @@
+{
+    "cSpell.words": [
+        "firestore"
+    ],
+    "prettier.jsxSingleQuote": true,
+    "prettier.singleQuote": true,
+    "prettier.singleAttributePerLine": true,
+    "prettier.useTabs": true
+}

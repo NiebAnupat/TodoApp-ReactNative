@@ -40,11 +40,15 @@ const useNavigation = () => (
 				title: null,
 				drawerLabel: () => null,
 				drawerPosition: 'right',
+				unmountOnBlur: true,
 			}}
 		/>
 		<Drawer.Screen
 			name='Todo'
 			component={Todo}
+			options={{
+				unmountOnBlur: true,
+			}}
 		/>
 	</Drawer.Navigator>
 );

@@ -80,7 +80,7 @@ export const userSignUp = (email, password, username) => async (dispatch) => {
 		console.log('User data updated');
 
 		console.log('Saving user...');
-		await firestore().collection('users').add({
+		await firestore().collection('users').doc(auth().currentUser.uid).set({
 			email: email,
 			password: password,
 		});

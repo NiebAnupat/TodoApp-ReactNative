@@ -25,6 +25,8 @@ import { bindActionCreators } from 'redux';
 import { getErrAuthMsg } from '../assets/getErrAuthMsg';
 import { getSignUpErrMsg } from '../assets/getSignUpErrMsg';
 import { getForgotPassErrMsg } from '../assets/getForgotPassErrMsg';
+import { BackHandler } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 export class Login extends Component {
 	constructor({ navigation }) {
@@ -54,6 +56,18 @@ export class Login extends Component {
 				console.log('User is not logged in');
 			}
 		});
+	}
+
+	backAction = () => {
+		BackHandler.exitApp();
+		return true;
+	};
+
+	componentDidMount() {
+		this.backHandler = BackHandler.addEventListener(
+			'hardwareBackPress',
+			this.backAction
+		);
 	}
 
 	handleEmailChange = (text) => {
